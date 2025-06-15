@@ -1,41 +1,41 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# Instrukcje dla Copilot - Plugin Node-RED MySQL Query
+# Copilot Instructions - Node-RED MySQL Query Plugin
 
-## Kontekst projektu
-To jest plugin do Node-RED służący do wykonywania zapytań MySQL z obsługą WebSocket. Plugin składa się z trzech głównych plików:
+## Project Context
+This is a Node-RED plugin for executing MySQL queries with WebSocket support. The plugin consists of three main files:
 
-1. **mysql-query.js** - główna logika backend
-2. **mysql-query.html** - interfejs użytkownika i dokumentacja 
-3. **package.json** - konfiguracja pakietu NPM
+1. **mysql-query.js** - main backend logic
+2. **mysql-query.html** - user interface and documentation 
+3. **package.json** - NPM package configuration
 
-## Miejsca do opisania funkcjonalności
+## Places to describe functionality
 
-### 1. W pliku mysql-query.js
-**Linie 8-18**: Główny komentarz opisujący funkcjonalność node'a
-- Opis co robi plugin
-- Jakie parametry konfiguracji obsługuje
-- Jak działa z WebSocket
+### 1. In mysql-query.js file
+**Lines 8-18**: Main comment describing node functionality
+- Description of what the plugin does
+- What configuration parameters it supports
+- How it works with WebSocket
 
-### 2. W pliku mysql-query.html
-**Linie 1-10**: Komentarz opisujący interfejs użytkownika
-**Linie 47-54**: Funkcja oneditprepare - walidacja i inicjalizacja
-**Linie 59-64**: Funkcja oneditsave - zapisywanie konfiguracji  
-**Linie 69-74**: Funkcja oneditcancel - anulowanie edycji
-**Linie 77-82**: Opis szablonu HTML
-**Linie 104-108**: Sekcja dokumentacji pomocy
+### 2. In mysql-query.html file
+**Lines 1-10**: Comment describing user interface
+**Lines 47-54**: oneditprepare function - validation and initialization
+**Lines 59-64**: oneditsave function - saving configuration  
+**Lines 69-74**: oneditcancel function - canceling editing
+**Lines 77-82**: HTML template description
+**Lines 104-108**: Help documentation section
 
-### 3. W pliku package.json
-**Linia 3**: Pole "description" - krótki opis funkcjonalności
-**Linie 6-12**: Słowa kluczowe opisujące plugin
+### 3. In package.json file
+**Line 3**: "description" field - brief functionality description
+**Lines 6-12**: Keywords describing the plugin
 
-## Konwencje kodowania
-- Używaj komentarzy JSDoc dla funkcji
-- Komentarze w języku polskim
-- Obsługa błędów z odpowiednimi komunikatami
-- Status node'a pokazuje aktualny stan operacji
+## Coding conventions
+- Use JSDoc comments for functions
+- Comments in English
+- Error handling with appropriate messages
+- Node status shows current operation state
 
-## Bezpieczeństwo
-- Zawsze używaj prepared statements
-- Waliduj dane wejściowe
-- Nie loguj haseł w kodzie
+## Security
+- Always use prepared statements
+- Validate input data
+- Don't log passwords in code

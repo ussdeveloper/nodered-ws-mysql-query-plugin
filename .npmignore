@@ -1,19 +1,18 @@
-# NPM Ignore - Ten pakiet nie powinien być publikowany do npm registry
-# This package should not be published to npm registry
+# NPM Ignore - This package should not be published to npm registry
 
-# Pliki testowe / Test files
+# Test files
 test/
 *.test.js
 coverage/
 .nyc_output/
 
-# Pliki deweloperskie / Development files
+# Development files
 .git/
 .github/
 .vscode/
 .idea/
 
-# Logi / Logs
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -58,5 +57,4 @@ docs/source/
 ehthumbs.db
 Thumbs.db
 
-# UWAGA: Ten plugin jest prywatny i dostępny tylko z GitHuba
 # NOTE: This plugin is private and available only from GitHub

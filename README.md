@@ -1,4 +1,4 @@
-# Node-RED MySQL WebSocket Server
+# Node-RED MyS> **📋 Availability Notice**: This is a public GitHub repository, but the plugin is **not available** in the Node-RED community palette. Installation is only possible directly from GitHub.L WebSocket Server
 
 [![Node.js CI](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/workflows/Node.js%20CI/badge.svg)](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -51,9 +51,9 @@
 
 ## 📦 Installation
 
-> **⚠️ Uwaga**: Ten plugin **NIE** jest dostępny w Node-RED community palette. Instalacja możliwa **TYLKO** bezpośrednio z publicznego repozytorium GitHub.
+> **⚠️ Warning**: This plugin is **NOT** available in the Node-RED community palette. Installation is possible **ONLY** directly from the public GitHub repository.
 
-### Instalacja z GitHuba
+### Installation from GitHub
 
 ```bash
 # Linux/macOS
@@ -65,7 +65,7 @@ cd %USERPROFILE%\.node-red
 npm install https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git
 ```
 
-Po instalacji zrestartuj Node-RED aby załadować nowy node.
+After installation, restart Node-RED to load the new node.
 
 ## 🔧 Configuration
 
