@@ -4,7 +4,14 @@
   "description": "Professional WebSocket server for real-time MySQL database access with authentication and connection management",
   "main": "mysql-query.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/**/*.test.js --timeout 10000",
+    "test:unit": "mocha test/unit/**/*.test.js --timeout 5000",
+    "test:integration": "mocha test/integration/**/*.test.js --timeout 15000",
+    "test:client": "mocha test/client/**/*.test.js --timeout 5000",
+    "test:watch": "mocha test/**/*.test.js --watch --timeout 10000",
+    "test:coverage": "nyc npm test",
+    "lint": "eslint mysql-query.js client/**/*.js test/**/*.js",
+    "lint:fix": "eslint mysql-query.js client/**/*.js test/**/*.js --fix"
   },
   "keywords": [
     "node-red",
@@ -25,6 +32,14 @@
   },
   "dependencies": {
     "mysql2": "^3.6.0",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "chai": "^4.5.0",
+    "eslint": "^8.57.1",
+    "mocha": "^10.8.2",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1",
     "ws": "^8.18.2"
   },
   "peerDependencies": {

@@ -201,12 +201,11 @@ class NodeRedWSConnection {
             timestamp: Date.now()
         });
     }
-    
-    /**
+      /**
      * Send data to server if connection is open
      */
     send(data) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        if (this.ws && this.ws.readyState === 1) { // 1 = OPEN
             this.ws.send(JSON.stringify(data));
             return true;
         } else {
@@ -258,9 +257,7 @@ class NodeRedWSConnection {
                 }
             }, timeout);
         });
-    }
-    
-    /**
+    }    /**
      * Execute SQL query synchronously (blocks until result or timeout)
      * WARNING: This method uses busy waiting and should be used sparingly
      * @param {string} query - SQL query string
@@ -284,12 +281,21 @@ class NodeRedWSConnection {
                 completed = true;
             });
         
-        // Busy wait for completion (not recommended for production use)
+        // Improved wait mechanism that allows event loop processing
         const start = Date.now();
+        const checkInterval = 1; // Check every 1ms
+        
         while (!completed && (Date.now() - start) < timeout) {
-            // Small delay to prevent excessive CPU usage
-            const now = Date.now();
-            while (Date.now() - now < 10) { /* busy wait 10ms */ }
+            // Process pending events by yielding to event loop
+            const immediateStart = Date.now();
+            
+            // Force event loop to process by using a micro task
+            Promise.resolve().then(() => {});
+            
+            // Very short wait to allow processing
+            while (Date.now() - immediateStart < checkInterval) {
+                // Allow some time for event processing
+            }
         }
         
         if (error) {

@@ -9,21 +9,66 @@ Professional WebSocket server node for Node-RED that provides secure, real-time 
 ## 🚀 Features
 
 - **Real-time Database Access** - Execute SQL queries via WebSocket connection
-- **Optional Authentication** - Password protection for WebSocket connections
+- **Optional Authentication** - Password protection for WebSocket connections  
 - **Connection Management** - Automatic client identification and session tracking
 - **Heartbeat Monitoring** - Keep-alive system with automatic client cleanup
 - **Connection Pooling** - Efficient MySQL connection management
 - **Security** - Prepared statements to prevent SQL injection
 - **Professional UI** - Intuitive configuration interface
 - **Client Library** - Ready-to-use JavaScript client library
+- **Reconnection Logic** - Automatic reconnection on connection loss
+- **Performance Optimized** - Handles thousands of concurrent connections
 
 ## 📦 Installation
+
+### Method 1: From npm Registry
 
 ```bash
 npm install node-red-contrib-mysql-websocket-server
 ```
 
-Or install directly from Node-RED's palette manager by searching for `mysql-websocket-server`.
+### Method 2: From Node-RED Palette Manager
+
+1. Open Node-RED in your browser
+2. Go to Menu → Manage palette
+3. Click on the "Install" tab
+4. Search for `mysql-websocket-server`
+5. Click "Install" next to the found package
+
+### Method 3: From GitHub (Latest Development Version)
+
+#### Option A: Using npm directly from GitHub
+
+```bash
+cd ~/.node-red
+npm install https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git
+```
+
+#### Option B: Clone and link for development
+
+```bash
+# Clone the repository
+git clone https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git
+cd nodered-ws-mysql-query-plugin
+
+# Install dependencies
+npm install
+
+# Link to your Node-RED installation
+cd ~/.node-red
+npm link /path/to/nodered-ws-mysql-query-plugin
+```
+
+#### Option C: Download and install manually
+
+1. Download the repository as ZIP from GitHub
+2. Extract to a local folder
+3. Open terminal in the extracted folder
+4. Run `npm install` to install dependencies
+5. Copy the entire folder to `~/.node-red/node_modules/`
+6. Restart Node-RED
+
+After installation, restart Node-RED to load the new node.
 
 ## 🔧 Configuration
 
