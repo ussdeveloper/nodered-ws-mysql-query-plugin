@@ -1,0 +1,34 @@
+name: Issues
+about: Choose from our issue templates
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 👋 Welcome to Node-RED MySQL WebSocket Server!
+        
+        Thank you for taking the time to report an issue or suggest an improvement.
+        
+        To help us assist you better, please choose the most appropriate template:
+        
+        - 🐛 **Bug Report**: For reporting problems or unexpected behavior
+        - 💡 **Feature Request**: For suggesting new features or enhancements  
+        - 🚀 **Performance Issue**: For reporting performance problems
+        - ❓ **Question**: For general questions or support requests
+        
+        ### Before Creating an Issue
+        
+        Please check:
+        - [ ] [Existing issues](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/issues)
+        - [ ] [Documentation](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin#readme)
+        - [ ] [Technical Specification](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/blob/main/TECHNICAL-SPECIFICATION.md)
+        
+        ### Quick Links
+        
+        - 📖 [README](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin#readme)
+        - 🔧 [Contributing Guide](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/blob/main/CONTRIBUTING.md)
+        - 🔒 [Security Policy](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/blob/main/SECURITY.md)
+        - 💬 [Discussions](https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/discussions)
+        
+        ---
+        
+        **Choose a template above to get started!** 👆

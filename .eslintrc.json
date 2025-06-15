@@ -20,9 +20,9 @@
     "no-var": "error",
     "arrow-spacing": "error",
     "object-curly-spacing": ["error", "always"]
-  },
-  "globals": {
+  },  "globals": {
     "RED": "readonly",
-    "WebSocket": "readonly"
+    "WebSocket": "readonly",
+    "window": "readonly"
   }
 }

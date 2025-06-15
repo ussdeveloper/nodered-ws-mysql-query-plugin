@@ -114,50 +114,50 @@ class NodeRedWSConnection {
      */
     handleMessage(message) {
         switch (message.type) {
-            case 'welcome':
-                this.clientId = message.clientId;
-                console.log(`[NodeRedWS] Received client ID: ${this.clientId}`);
+        case 'welcome':
+            this.clientId = message.clientId;
+            console.log(`[NodeRedWS] Received client ID: ${this.clientId}`);
                 
-                if (message.requiresAuth && this.password) {
-                    this.authenticate();
-                } else if (!message.requiresAuth) {
-                    this.authenticated = true;
-                    console.log('[NodeRedWS] Auto-authenticated (no password required)');
-                } else {
-                    console.warn('[NodeRedWS] Authentication required but no password provided');
-                }
-                break;
+            if (message.requiresAuth && this.password) {
+                this.authenticate();
+            } else if (!message.requiresAuth) {
+                this.authenticated = true;
+                console.log('[NodeRedWS] Auto-authenticated (no password required)');
+            } else {
+                console.warn('[NodeRedWS] Authentication required but no password provided');
+            }
+            break;
                 
-            case 'auth_response':
-                this.authenticated = message.success;
-                if (message.success) {
-                    console.log('[NodeRedWS] Authentication successful');
-                } else {
-                    console.error('[NodeRedWS] Authentication failed:', message.error);
-                    if (this.onError) this.onError(new Error(`Authentication failed: ${message.error}`));
-                }
-                break;
+        case 'auth_response':
+            this.authenticated = message.success;
+            if (message.success) {
+                console.log('[NodeRedWS] Authentication successful');
+            } else {
+                console.error('[NodeRedWS] Authentication failed:', message.error);
+                if (this.onError) this.onError(new Error(`Authentication failed: ${message.error}`));
+            }
+            break;
                 
-            case 'query_response':
-                this.handleQueryResponse(message);
-                break;
+        case 'query_response':
+            this.handleQueryResponse(message);
+            break;
                 
-            case 'heartbeat':
-                if (this.onHeartbeat) this.onHeartbeat();
-                this.respondToPing();
-                break;
+        case 'heartbeat':
+            if (this.onHeartbeat) this.onHeartbeat();
+            this.respondToPing();
+            break;
                 
-            case 'pong':
-                if (this.onServerPing) this.onServerPing();
-                break;
+        case 'pong':
+            if (this.onServerPing) this.onServerPing();
+            break;
                 
-            case 'error':
-                console.error('[NodeRedWS] Server error:', message.error);
-                if (this.onError) this.onError(new Error(message.error));
-                break;
+        case 'error':
+            console.error('[NodeRedWS] Server error:', message.error);
+            if (this.onError) this.onError(new Error(message.error));
+            break;
                 
-            default:
-                console.warn('[NodeRedWS] Unknown message type:', message.type);
+        default:
+            console.warn('[NodeRedWS] Unknown message type:', message.type);
         }
     }
     
@@ -201,7 +201,7 @@ class NodeRedWSConnection {
             timestamp: Date.now()
         });
     }
-      /**
+    /**
      * Send data to server if connection is open
      */
     send(data) {

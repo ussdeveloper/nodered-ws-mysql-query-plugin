@@ -21,7 +21,7 @@ global.setTimeout = (fn, delay) => {
 // Mock Node-RED environment for unit tests
 global.RED = {
     nodes: {
-        createNode: function(node, config) {
+        createNode: function(node, _config) {
             node.status = function() {};
             node.error = function() {};
             node.log = function() {};

@@ -16,7 +16,7 @@ global.WebSocket = class MockWebSocket {
         }, 10);
     }
     
-    send(data) {
+    send(_data) {
         // Mock successful send
         if (this.mockResponse) {
             setTimeout(() => {
@@ -46,7 +46,7 @@ describe('NodeRedWSConnection Client Library Tests', function() {
     this.timeout(5000);
     
     let client;
-      afterEach(function() {
+    afterEach(function() {
         if (client && client.ws && typeof client.ws.close === 'function') {
             client.disconnect();
         }
@@ -108,7 +108,7 @@ describe('NodeRedWSConnection Client Library Tests', function() {
                 done();
             };
         });
-          it('should handle disconnection', function(done) {
+        it('should handle disconnection', function(done) {
             let disconnectCalled = false;
             client = new NodeRedWSConnection('ws://localhost:8080/mysql-ws');
             
@@ -317,7 +317,7 @@ describe('NodeRedWSConnection Client Library Tests', function() {
             
             // Mock the Query method to return immediately resolved promise
             const originalQuery = client.Query;
-            client.Query = function(query, params, timeout) {
+            client.Query = function(_query, _params, _timeout) {
                 return Promise.resolve({
                     data: [{ result: 'test' }],
                     rowCount: 1
@@ -433,7 +433,7 @@ describe('NodeRedWSConnection Client Library Tests', function() {
                 client.ws.close(1006, 'Connection lost');
             };
         });
-          it('should not reconnect on normal disconnect', function(done) {
+        it('should not reconnect on normal disconnect', function(done) {
             const originalConnect = NodeRedWSConnection.prototype.connect;
             let connectCalled = 0;
             let disconnectCalled = false;

@@ -122,22 +122,22 @@ describe('MySQL WebSocket Server - Integration Tests', function() {
                     const data = JSON.parse(message);
                     
                     switch (data.type) {
-                        case 'query':
-                            ws.send(JSON.stringify({
-                                type: 'query_response',
-                                queryId: data.queryId,
-                                success: true,
-                                data: [{ result: 'test data' }],
-                                rowCount: 1
-                            }));
-                            break;
+                    case 'query':
+                        ws.send(JSON.stringify({
+                            type: 'query_response',
+                            queryId: data.queryId,
+                            success: true,
+                            data: [{ result: 'test data' }],
+                            rowCount: 1
+                        }));
+                        break;
                             
-                        case 'ping':
-                            ws.send(JSON.stringify({
-                                type: 'pong',
-                                timestamp: Date.now()
-                            }));
-                            break;
+                    case 'ping':
+                        ws.send(JSON.stringify({
+                            type: 'pong',
+                            timestamp: Date.now()
+                        }));
+                        break;
                     }
                 });
             });

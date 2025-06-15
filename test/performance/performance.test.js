@@ -122,7 +122,7 @@ describe('Performance Tests', function() {
                 client.disconnect();
             }
         });
-          it('should process queries quickly', async function() {
+        it('should process queries quickly', async function() {
             // Ensure client is ready for queries
             if (!client.authenticated) {
                 client.authenticated = true;
@@ -152,7 +152,7 @@ describe('Performance Tests', function() {
                 throw new Error(`Failed to process queries: ${error.message}`);
             }
         });
-          it('should handle large result sets efficiently', async function() {
+        it('should handle large result sets efficiently', async function() {
             // Ensure client is ready for queries
             if (!client.authenticated) {
                 client.authenticated = true;
@@ -162,7 +162,6 @@ describe('Performance Tests', function() {
             }
             
             // Mock large dataset response
-            const originalSend = client.ws.send;
             client.ws.send = function(data) {
                 const message = JSON.parse(data);
                 if (message.type === 'query') {
@@ -256,83 +255,83 @@ describe('Performance Tests', function() {
     });
     
     describe('Stress Testing', function() {        it('should handle rapid message bursts', function(done) {
-            this.timeout(15000);
+        this.timeout(15000);
             
-            const messageCount = 1000;
-            let messagesProcessed = 0;
-            let responsesReceived = 0;
+        const messageCount = 1000;
+        let messagesProcessed = 0;
+        let responsesReceived = 0;
             
-            // Mock high-throughput WebSocket
-            global.WebSocket = class BurstWebSocket {
-                constructor() {
-                    this.readyState = 1;
-                    setTimeout(() => {
-                        if (this.onopen) this.onopen();
-                    }, 5);
-                }
+        // Mock high-throughput WebSocket
+        global.WebSocket = class BurstWebSocket {
+            constructor() {
+                this.readyState = 1;
+                setTimeout(() => {
+                    if (this.onopen) this.onopen();
+                }, 5);
+            }
                 
-                send(data) {
-                    const message = JSON.parse(data);
+            send(data) {
+                const message = JSON.parse(data);
                     
-                    // Simulate rapid responses
-                    if (message.type === 'query') {
-                        setImmediate(() => {
-                            if (this.onmessage) {
-                                responsesReceived++;
-                                this.onmessage({
-                                    data: JSON.stringify({
-                                        type: 'query_response',
-                                        queryId: message.queryId,
-                                        success: true,
-                                        data: [{ result: 'ok' }],
-                                        rowCount: 1
-                                    })
-                                });
-                            }
-                        });
-                    }
+                // Simulate rapid responses
+                if (message.type === 'query') {
+                    setImmediate(() => {
+                        if (this.onmessage) {
+                            responsesReceived++;
+                            this.onmessage({
+                                data: JSON.stringify({
+                                    type: 'query_response',
+                                    queryId: message.queryId,
+                                    success: true,
+                                    data: [{ result: 'ok' }],
+                                    rowCount: 1
+                                })
+                            });
+                        }
+                    });
                 }
+            }
                 
-                close() {
-                    if (this.onclose) this.onclose({ code: 1000 });
-                }
-            };
+            close() {
+                if (this.onclose) this.onclose({ code: 1000 });
+            }
+        };
             
-            const client = new NodeRedWSConnection('ws://localhost:8080/stress-test');
+        const client = new NodeRedWSConnection('ws://localhost:8080/stress-test');
             
-            client.onConnect = async () => {
-                client.authenticated = true;
-                const startTime = performance.now();
+        client.onConnect = async () => {
+            client.authenticated = true;
+            const startTime = performance.now();
                 
-                // Send burst of queries
-                const promises = [];
-                for (let i = 0; i < messageCount; i++) {
-                    promises.push(
-                        client.Query(`SELECT ${i} as test_id`)
-                            .then(() => {
-                                messagesProcessed++;
-                            })
-                            .catch((error) => {
-                                console.error(`Query ${i} failed:`, error);
-                            })
-                    );
-                }
+            // Send burst of queries
+            const promises = [];
+            for (let i = 0; i < messageCount; i++) {
+                promises.push(
+                    client.Query(`SELECT ${i} as test_id`)
+                        .then(() => {
+                            messagesProcessed++;
+                        })
+                        .catch((error) => {
+                            console.error(`Query ${i} failed:`, error);
+                        })
+                );
+            }
                 
-                try {
-                    await Promise.all(promises);
-                    const totalTime = performance.now() - startTime;
+            try {
+                await Promise.all(promises);
+                const totalTime = performance.now() - startTime;
                     
-                    expect(messagesProcessed).to.equal(messageCount);
-                    console.log(`\n    📊 Processed ${messageCount} messages in ${totalTime.toFixed(2)}ms`);
-                    console.log(`    📊 Responses received: ${responsesReceived}`);
-                    console.log(`    📊 Throughput: ${(messageCount / totalTime * 1000).toFixed(0)} messages/second`);
+                expect(messagesProcessed).to.equal(messageCount);
+                console.log(`\n    📊 Processed ${messageCount} messages in ${totalTime.toFixed(2)}ms`);
+                console.log(`    📊 Responses received: ${responsesReceived}`);
+                console.log(`    📊 Throughput: ${(messageCount / totalTime * 1000).toFixed(0)} messages/second`);
                     
-                    client.disconnect();
-                    done();
-                } catch (error) {
-                    done(error);
-                }
-            };
-        });
+                client.disconnect();
+                done();
+            } catch (error) {
+                done(error);
+            }
+        };
+    });
     });
 });

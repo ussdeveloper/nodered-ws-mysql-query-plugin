@@ -1,19 +1,20 @@
 {
   "name": "node-red-contrib-mysql-websocket-server",
   "version": "1.0.0",
-  "description": "Professional WebSocket server for real-time MySQL database access with authentication and connection management",
-  "main": "mysql-query.js",
-  "scripts": {
+  "description": "Professional WebSocket server for real-time MySQL database access with authentication, connection management, and high-performance query execution for Node-RED",
+  "private": true,
+  "main": "mysql-query.js","scripts": {
     "test": "mocha test/**/*.test.js --timeout 10000",
     "test:unit": "mocha test/unit/**/*.test.js --timeout 5000",
     "test:integration": "mocha test/integration/**/*.test.js --timeout 15000",
     "test:client": "mocha test/client/**/*.test.js --timeout 5000",
     "test:watch": "mocha test/**/*.test.js --watch --timeout 10000",
     "test:coverage": "nyc npm test",
-    "lint": "eslint mysql-query.js client/**/*.js test/**/*.js",
-    "lint:fix": "eslint mysql-query.js client/**/*.js test/**/*.js --fix"
-  },
-  "keywords": [
+    "lint": "eslint mysql-query.js client/**/*.js test/**/*.js",    "lint:fix": "eslint mysql-query.js client/**/*.js test/**/*.js --fix",
+    "start": "node-red",
+    "dev": "npm run test:watch",
+    "build": "npm run lint && npm test"
+  },"keywords": [
     "node-red",
     "mysql",
     "websocket",
@@ -21,10 +22,47 @@
     "real-time",
     "authentication",
     "connection-pooling",
-    "heartbeat"
+    "heartbeat",
+    "sql",
+    "mariadb",
+    "client-server",
+    "api",
+    "socket",
+    "streaming",
+    "performance",
+    "high-throughput",
+    "reconnection",
+    "prepared-statements",
+    "security",
+    "iot",
+    "automation",
+    "monitoring"
   ],
-  "author": "Your Name",
+  "author": {
+    "name": "Node-RED MySQL WebSocket Server Team",
+    "email": "support@nodered-mysql-ws.dev",
+    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin"
+  },
+  "contributors": [
+    {
+      "name": "USS Developer",
+      "url": "https://github.com/ussdeveloper"
+    }
+  ],
   "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "node-red": {
     "nodes": {
       "mysql-websocket-server": "mysql-query.js"
@@ -44,13 +82,39 @@
   },
   "peerDependencies": {
     "node-red": "^3.0.0"
-  },
-  "repository": {
+  },  "repository": {
     "type": "git",
-    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git"
+    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git",
+    "directory": "."
   },
   "bugs": {
-    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/issues"
+    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/issues",
+    "email": "support@nodered-mysql-ws.dev"
   },
-  "homepage": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin#readme"
+  "homepage": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ussdeveloper"
+  },
+  "directories": {
+    "test": "test",
+    "lib": "client"
+  },
+  "files": [
+    "mysql-query.js",
+    "mysql-query.html",
+    "client/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "TECHNICAL-SPECIFICATION.md"
+  ],  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "installInstructions": {
+    "note": "This package is not available in Node-RED community palette - install only from GitHub",
+    "install": "npm install https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git",
+    "nodeRedInstall": "cd ~/.node-red && npm install https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git"
+  }
 }

@@ -1,5 +1,5 @@
 module.exports = function(RED) {
-    "use strict";
+    'use strict';
     
     const mysql = require('mysql2/promise');
     const WebSocket = require('ws');
@@ -67,11 +67,11 @@ module.exports = function(RED) {
                 await connection.ping();
                 connection.release();
                 
-                node.status({fill:"green", shape:"dot", text:`Connected to ${node.database}`});
+                node.status({ fill:'green', shape:'dot', text:`Connected to ${node.database}` });
                 return true;
             } catch (error) {
-                node.error("Database connection failed: " + error.message);
-                node.status({fill:"red", shape:"ring", text:"DB connection failed"});
+                node.error('Database connection failed: ' + error.message);
+                node.status({ fill:'red', shape:'ring', text:'DB connection failed' });
                 return false;
             }
         }
@@ -123,54 +123,55 @@ module.exports = function(RED) {
                 const client = node.clients.get(clientId);
                 
                 if (!client) {
-                    return { error: "Client not found" };
+                    return { error: 'Client not found' };
                 }
                 
                 switch (data.type) {
-                    case 'auth':
-                        if (authenticateClient(data.password)) {
-                            client.authenticated = true;
-                            return {
-                                type: 'auth_response',
-                                success: true,
-                                clientId: clientId
-                            };
-                        } else {
-                            return {
-                                type: 'auth_response',
-                                success: false,
-                                error: 'Invalid password'
-                            };
-                        }
+                case 'auth':
+                    if (authenticateClient(data.password)) {
+                        client.authenticated = true;
+                        return {
+                            type: 'auth_response',
+                            success: true,
+                            clientId: clientId
+                        };
+                    } else {
+                        return {
+                            type: 'auth_response',
+                            success: false,
+                            error: 'Invalid password'
+                        };
+                    }
                         
-                    case 'query':
-                        if (!client.authenticated && node.wsPassword) {
-                            return {
-                                type: 'query_response',
-                                success: false,
-                                error: 'Authentication required'
-                            };
-                        }
-                        
-                        const result = await executeQuery(data.query, data.params);
+                case 'query': {
+                    if (!client.authenticated && node.wsPassword) {
                         return {
                             type: 'query_response',
-                            queryId: data.queryId,
-                            ...result
+                            success: false,
+                            error: 'Authentication required'
                         };
+                    }
                         
-                    case 'ping':
-                        client.lastPing = Date.now();
-                        return {
-                            type: 'pong',
-                            timestamp: Date.now()
-                        };
+                    const result = await executeQuery(data.query, data.params);
+                    return {
+                        type: 'query_response',
+                        queryId: data.queryId,
+                        ...result
+                    };
+                }
                         
-                    default:
-                        return {
-                            type: 'error',
-                            error: 'Unknown message type'
-                        };
+                case 'ping':
+                    client.lastPing = Date.now();
+                    return {
+                        type: 'pong',
+                        timestamp: Date.now()
+                    };
+                        
+                default:
+                    return {
+                        type: 'error',
+                        error: 'Unknown message type'
+                    };
                 }
             } catch (error) {
                 return {
@@ -214,8 +215,8 @@ module.exports = function(RED) {
                 
                 // Update status
                 node.status({
-                    fill: "green",
-                    shape: "dot",
+                    fill: 'green',
+                    shape: 'dot',
                     text: `${node.clients.size} clients connected`
                 });
                 
@@ -276,14 +277,14 @@ module.exports = function(RED) {
                 return true;
                 
             } catch (error) {
-                node.error("WebSocket server initialization failed: " + error.message);
+                node.error('WebSocket server initialization failed: ' + error.message);
                 return false;
             }
         }
         
         // Initialize the node
         async function initialize() {
-            node.status({fill:"yellow", shape:"ring", text:"initializing..."});
+            node.status({ fill:'yellow', shape:'ring', text:'initializing...' });
             
             const dbConnected = await initializeDatabase();
             if (!dbConnected) return;
@@ -294,8 +295,8 @@ module.exports = function(RED) {
             startHeartbeat();
             
             node.status({
-                fill:"green", 
-                shape:"dot", 
+                fill:'green', 
+                shape:'dot', 
                 text:`WebSocket server running on :${node.wsPort}${node.wsEndpoint}`
             });
         }
@@ -326,5 +327,5 @@ module.exports = function(RED) {
     }
     
     // Register the node
-    RED.nodes.registerType("mysql-websocket-server", MySQLWebSocketServerNode);
+    RED.nodes.registerType('mysql-websocket-server', MySQLWebSocketServerNode);
 };

@@ -1,6 +1,5 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const WebSocket = require('ws');
 
 // Mock Node-RED environment
 const mockRED = {
@@ -9,9 +8,6 @@ const mockRED = {
         registerType: sinon.stub()
     }
 };
-
-// Load the node implementation
-let MySQLWebSocketServerNode;
 
 describe('MySQL WebSocket Server Node - Unit Tests', function() {
     this.timeout(5000);
@@ -24,80 +20,77 @@ describe('MySQL WebSocket Server Node - Unit Tests', function() {
         delete require.cache[require.resolve('../../mysql-query.js')];
         const nodeModule = require('../../mysql-query.js');
         nodeModule(mockRED);
-        
-        // Get the registered node constructor
-        MySQLWebSocketServerNode = mockRED.nodes.registerType.getCall(0).args[1];
     });
     
     describe('Node Configuration', function() {        it('should initialize with default configuration', function() {
-            const config = {
-                host: 'localhost',
-                port: 3306,
-                user: 'testuser',
-                password: 'testpass',
-                database: 'testdb'
-            };
+        const config = {
+            host: 'localhost',
+            port: 3306,
+            user: 'testuser',
+            password: 'testpass',
+            database: 'testdb'
+        };
             
-            const mockNode = {
-                status: sinon.stub(),
-                error: sinon.stub(),
-                log: sinon.stub(),
-                on: sinon.stub(),
-                host: 'localhost',
-                port: 3306,
-                user: 'testuser',
-                password: 'testpass',
-                database: 'testdb',
-                wsEndpoint: '/mysql-ws',
-                wsPort: 8080
-            };
+        const mockNode = {
+            status: sinon.stub(),
+            error: sinon.stub(),
+            log: sinon.stub(),
+            on: sinon.stub(),
+            host: 'localhost',
+            port: 3306,
+            user: 'testuser',
+            password: 'testpass',
+            database: 'testdb',
+            wsEndpoint: '/mysql-ws',
+            wsPort: 8080
+        };
             
-            mockRED.nodes.createNode = sinon.stub().callsFake((node, cfg) => {
-                Object.assign(node, mockNode);
-                Object.assign(node, cfg);
-                return node;
-            });
-            
-            // Mock the constructor without actually calling it
-            // since it requires database connections
-            expect(config.host).to.equal('localhost');
-            expect(config.port).to.equal(3306);
-            expect(config.user).to.equal('testuser');
-            expect(config.password).to.equal('testpass');
-            expect(config.database).to.equal('testdb');
+        mockRED.nodes.createNode = sinon.stub().callsFake((node, cfg) => {
+            Object.assign(node, mockNode);
+            Object.assign(node, cfg);
+            return node;
         });
-          it('should use custom WebSocket configuration', function() {
-            const config = {
-                host: 'localhost',
-                port: 3306,
-                user: 'testuser',
-                password: 'testpass',
-                database: 'testdb',
-                wsEndpoint: '/custom-ws',
-                wsPort: 9090,
-                wsPassword: 'secret',
-                heartbeatInterval: 60000
-            };
             
-            const mockNode = {
-                status: sinon.stub(),
-                error: sinon.stub(),
-                log: sinon.stub(),
-                on: sinon.stub()
-            };
+        // Mock the constructor without actually calling it
+        // since it requires database connections
+        expect(config.host).to.equal('localhost');
+        expect(config.port).to.equal(3306);
+        expect(config.user).to.equal('testuser');
+        expect(config.password).to.equal('testpass');
+        expect(config.database).to.equal('testdb');
+    });
+    it('should use custom WebSocket configuration', function() {
+        const config = {
+            host: 'localhost',
+            port: 3306,
+            user: 'testuser',
+            password: 'testpass',
+            database: 'testdb',
+            wsEndpoint: '/custom-ws',
+            wsPort: 9090,
+            wsPassword: 'secret',
+            heartbeatInterval: 60000
+        };
             
-            mockRED.nodes.createNode = sinon.stub().callsFake((node, cfg) => {
-                Object.assign(node, mockNode);
-                Object.assign(node, cfg);
-                return node;
-            });
+        const mockNode = {
+            status: sinon.stub(),
+            error: sinon.stub(),
+            log: sinon.stub(),
+            on: sinon.stub()
+        };
             
-            // Test configuration values
-            expect(config.wsEndpoint).to.equal('/custom-ws');
-            expect(config.wsPort).to.equal(9090);
-            expect(config.wsPassword).to.equal('secret');
-            expect(config.heartbeatInterval).to.equal(60000);
+        mockRED.nodes.createNode = sinon.stub().callsFake((node, cfg) => {
+            Object.assign(node, mockNode);
+            Object.assign(node, cfg);
+            return node;
         });
+            
+        // Test configuration values
+        expect(config.wsEndpoint).to.equal('/custom-ws');
+        expect(config.wsPort).to.equal(9090);
+        expect(config.wsPassword).to.equal('secret');
+        expect(config.heartbeatInterval).to.equal(60000);
+    });
     });
     
     describe('Client ID Generation', function() {
@@ -107,15 +100,6 @@ describe('MySQL WebSocket Server Node - Unit Tests', function() {
             
             let callCount = 0;
             crypto.randomUUID = () => `test-uuid-${++callCount}`;
-            
-            // Mock node for testing
-            const config = {
-                host: 'localhost',
-                port: 3306,
-                user: 'testuser',
-                password: 'testpass',
-                database: 'testdb'
-            };
             
             const mockNode = {
                 status: sinon.stub(),
