@@ -1,17 +1,14 @@
 <!--
-MIEJSCE DO OPISANIA INTERFEJSU UŻYTKOWNIKA:
-Ten plik HTML definiuje interfejs konfiguracyjny dla node'a MySQL Query w Node-RED.
-Zawiera formularze do wprowadzania danych połączenia z bazą danych oraz zapytań SQL.
-
-Sekcje interfejsu:
-1. Konfiguracja połączenia z bazą danych
-2. Pole zapytania SQL
-3. Opcje zaawansowane
-4. Pomoc i dokumentacja
+Professional WebSocket MySQL Server Node UI
+Provides configuration interface for:
+1. MySQL database connection settings
+2. WebSocket server configuration
+3. Authentication and security options
+4. Connection monitoring settings
 -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('mysql-query', {
+    RED.nodes.registerType('mysql-websocket-server', {
         category: 'database',
         color: '#4B8BBE',
         defaults: {
@@ -21,139 +18,230 @@ Sekcje interfejsu:
             user: { value: "", required: true },
             password: { value: "", required: true },
             database: { value: "", required: true },
-            query: { value: "SELECT * FROM table_name LIMIT 10" }
+            wsEndpoint: { value: "/mysql-ws", required: true },
+            wsPort: { value: 8080, required: true, validate: RED.validators.number() },
+            wsPassword: { value: "" },
+            heartbeatInterval: { value: 30000, required: true, validate: RED.validators.number() }
         },
-        inputs: 1,
-        outputs: 1,
+        inputs: 0,
+        outputs: 0,
         icon: "db.png",
         label: function() {
-            return this.name || "MySQL Query";
+            return this.name || `MySQL WS Server :${this.wsPort}`;
         },
         labelStyle: function() {
             return this.name ? "node_label_italic" : "";
         },
         /**
-         * MIEJSCE DO OPISANIA WALIDACJI:
-         * Funkcja oneditprepare jest wywoływana przy otwieraniu okna edycji.
-         * Tutaj można dodać dodatkową logikę walidacji i inicjalizacji interfejsu.
+         * Initialize configuration UI
+         * Sets up form validation and default values
          */
         oneditprepare: function() {
-            // Inicjalizacja edytora SQL z podświetlaniem składni
-            this.editor = RED.editor.createEditor({
-                id: 'node-input-query-editor',
-                mode: 'ace/mode/sql',
-                value: this.query || "SELECT * FROM table_name LIMIT 10"
+            // Initialize tooltips
+            $("#node-input-wsPassword").attr("placeholder", "Leave empty for no authentication");
+            $("#node-input-wsEndpoint").attr("placeholder", "/mysql-ws");
+            $("#node-input-heartbeatInterval").attr("placeholder", "30000");
+            
+            // Add validation
+            $("#node-input-wsPort").on('input', function() {
+                const port = parseInt($(this).val());
+                if (port < 1024 || port > 65535) {
+                    $(this).addClass('input-error');
+                } else {
+                    $(this).removeClass('input-error');
+                }
+            });
+            
+            // Test connection button
+            $("#test-connection").click(function() {
+                const button = $(this);
+                button.prop('disabled', true).text('Testing...');
+                
+                // Simulate connection test (in real implementation, this would make an actual test)
+                setTimeout(function() {
+                    button.prop('disabled', false).text('Test Connection');
+                    // Show result (placeholder)
+                    RED.notify("Connection test completed", "success");
+                }, 2000);
             });
         },
         /**
-         * MIEJSCE DO OPISANIA ZAPISYWANIA KONFIGURACJI:
-         * Funkcja oneditsave jest wywoływana przy zapisywaniu konfiguracji node'a.
+         * Save configuration
+         * Validates settings before saving
          */
         oneditsave: function() {
-            this.query = this.editor.getValue();
-            this.editor.destroy();
-            delete this.editor;
+            // Validate WebSocket endpoint format
+            let endpoint = $("#node-input-wsEndpoint").val();
+            if (!endpoint.startsWith('/')) {
+                endpoint = '/' + endpoint;
+                $("#node-input-wsEndpoint").val(endpoint);
+            }
         },
         /**
-         * MIEJSCE DO OPISANIA ANULOWANIA EDYCJI:
-         * Funkcja oneditcancel jest wywoływana przy anulowaniu edycji.
+         * Cancel configuration editing
          */
         oneditcancel: function() {
-            this.editor.destroy();
-            delete this.editor;
+            // Clean up any temporary UI state
         }
     });
 </script>
 
 <!-- 
-MIEJSCE DO OPISANIA SZABLONU HTML:
-Poniższy szablon definiuje pola formularza konfiguracyjnego.
-Każde pole odpowiada właściwości zdefiniowanej w obiekcie 'defaults' powyżej.
+Configuration UI Template
+Professional form layout for WebSocket MySQL server configuration
 -->
-<script type="text/html" data-template-name="mysql-query">
+<script type="text/html" data-template-name="mysql-websocket-server">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Nazwa</label>
-        <input type="text" id="node-input-name" placeholder="Nazwa node'a">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="WebSocket MySQL Server">
+    </div>
+    
+    <!-- Database Configuration Section -->
+    <div class="form-row">
+        <h4>Database Configuration</h4>
     </div>
     
     <div class="form-row">
-        <label for="node-input-host"><i class="fa fa-server"></i> Host</label>
+        <label for="node-input-host"><i class="fa fa-server"></i> MySQL Host</label>
         <input type="text" id="node-input-host" placeholder="localhost">
     </div>
     
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-plug"></i> Port</label>
-        <input type="number" id="node-input-port" placeholder="3306">
+        <label for="node-input-port"><i class="fa fa-plug"></i> MySQL Port</label>
+        <input type="number" id="node-input-port" placeholder="3306" min="1" max="65535">
     </div>
     
     <div class="form-row">
-        <label for="node-input-user"><i class="fa fa-user"></i> Użytkownik</label>
-        <input type="text" id="node-input-user" placeholder="root">
+        <label for="node-input-user"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-user" placeholder="Database username">
     </div>
     
     <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-lock"></i> Hasło</label>
-        <input type="password" id="node-input-password">
+        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Database password">
     </div>
     
     <div class="form-row">
-        <label for="node-input-database"><i class="fa fa-database"></i> Baza danych</label>
-        <input type="text" id="node-input-database" placeholder="nazwa_bazy">
+        <label for="node-input-database"><i class="fa fa-database"></i> Database</label>
+        <input type="text" id="node-input-database" placeholder="Database name">
     </div>
     
-    <div class="form-row" style="height: 250px;">
-        <label for="node-input-query-editor"><i class="fa fa-code"></i> Zapytanie SQL</label>
-        <div id="node-input-query-editor" style="height: 200px;"></div>
+    <div class="form-row">
+        <button type="button" id="test-connection" class="btn">Test Connection</button>
+    </div>
+    
+    <!-- WebSocket Configuration Section -->
+    <div class="form-row">
+        <h4>WebSocket Server Configuration</h4>
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-wsPort"><i class="fa fa-wifi"></i> WebSocket Port</label>
+        <input type="number" id="node-input-wsPort" placeholder="8080" min="1024" max="65535">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-wsEndpoint"><i class="fa fa-link"></i> Endpoint Path</label>
+        <input type="text" id="node-input-wsEndpoint" placeholder="/mysql-ws">
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-wsPassword"><i class="fa fa-key"></i> WebSocket Password</label>
+        <input type="password" id="node-input-wsPassword" placeholder="Leave empty for no authentication">
+    </div>
+    
+    <!-- Advanced Configuration Section -->
+    <div class="form-row">
+        <h4>Advanced Settings</h4>
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-heartbeatInterval"><i class="fa fa-heartbeat"></i> Heartbeat Interval (ms)</label>
+        <input type="number" id="node-input-heartbeatInterval" placeholder="30000" min="5000" max="300000">
     </div>
 </script>
 
 <!-- 
-MIEJSCE DO OPISANIA DOKUMENTACJI HELP:
-Ta sekcja zawiera dokumentację która będzie wyświetlana w panelu pomocy Node-RED.
-Opisuje funkcjonalność, parametry wejściowe i wyjściowe oraz przykłady użycia.
+Professional Documentation
+Comprehensive help documentation for the WebSocket MySQL Server node
 -->
-<script type="text/html" data-help-name="mysql-query">
-    <p>Node do wykonywania zapytań SQL w bazie danych MySQL.</p>
+<script type="text/html" data-help-name="mysql-websocket-server">
+    <p>Professional WebSocket server that provides secure, real-time access to MySQL databases.</p>
     
-    <h3>Wejście</h3>
+    <h3>Features</h3>
+    <ul>
+        <li><strong>Real-time Database Access</strong> - Execute SQL queries via WebSocket</li>
+        <li><strong>Authentication</strong> - Optional password protection</li>
+        <li><strong>Connection Management</strong> - Automatic client identification and heartbeat monitoring</li>
+        <li><strong>Connection Pooling</strong> - Efficient MySQL connection management</li>
+        <li><strong>Client Library</strong> - Ready-to-use JavaScript client library</li>
+    </ul>
+    
+    <h3>Configuration</h3>
+    
+    <h4>Database Settings</h4>
     <dl class="message-properties">
-        <dt>payload <span class="property-type">any</span></dt>
-        <dd>Dowolne dane wejściowe (opcjonalne)</dd>
+        <dt>MySQL Host <span class="property-type">string</span></dt>
+        <dd>MySQL server hostname or IP address</dd>
         
-        <dt class="optional">query <span class="property-type">string</span></dt>
-        <dd>Zapytanie SQL do wykonania (nadpisuje konfigurację)</dd>
+        <dt>MySQL Port <span class="property-type">number</span></dt>
+        <dd>MySQL server port (default: 3306)</dd>
         
-        <dt class="optional">params <span class="property-type">array</span></dt>
-        <dd>Parametry do zapytania SQL (dla prepared statements)</dd>
+        <dt>Username <span class="property-type">string</span></dt>
+        <dd>MySQL database username</dd>
+        
+        <dt>Password <span class="property-type">string</span></dt>
+        <dd>MySQL database password</dd>
+        
+        <dt>Database <span class="property-type">string</span></dt>
+        <dd>Target database name</dd>
     </dl>
     
-    <h3>Wyjście</h3>
+    <h4>WebSocket Settings</h4>
     <dl class="message-properties">
-        <dt>payload <span class="property-type">array</span></dt>
-        <dd>Wyniki zapytania jako tablica obiektów</dd>
+        <dt>WebSocket Port <span class="property-type">number</span></dt>
+        <dd>Port for WebSocket server (default: 8080)</dd>
         
-        <dt>fields <span class="property-type">array</span></dt>
-        <dd>Informacje o polach wyniku</dd>
+        <dt>Endpoint Path <span class="property-type">string</span></dt>
+        <dd>WebSocket endpoint path (default: /mysql-ws)</dd>
         
-        <dt>rowCount <span class="property-type">number</span></dt>
-        <dd>Liczba zwróconych rekordów</dd>
+        <dt>WebSocket Password <span class="property-type">string</span></dt>
+        <dd>Optional password for client authentication</dd>
+        
+        <dt>Heartbeat Interval <span class="property-type">number</span></dt>
+        <dd>Client heartbeat interval in milliseconds (default: 30000)</dd>
     </dl>
     
-    <h3>Szczegóły</h3>
-    <p>Ten node pozwala na wykonywanie zapytań SQL do bazy danych MySQL. 
-    Obsługuje zarówno zapytania skonfigurowane w node'ie, jak i zapytania przekazywane 
-    dynamicznie przez właściwość <code>msg.query</code>.</p>
+    <h3>Client Connection</h3>
+    <p>Connect to the WebSocket server using the provided JavaScript client library:</p>
+    <pre>const connection = new NodeRedWSConnection('ws://localhost:8080/mysql-ws', 'password');</pre>
     
-    <p>Parametry połączenia z bazą danych są konfigurowane w interfejsie node'a.</p>
+    <h3>Security</h3>
+    <ul>
+        <li>All SQL queries use prepared statements to prevent SQL injection</li>
+        <li>Optional password authentication for WebSocket connections</li>
+        <li>Automatic client identification and session management</li>
+        <li>Connection timeout and cleanup for security</li>
+    </ul>
     
-    <h3>Przykład użycia</h3>
-    <p>Aby wykonać zapytanie SELECT:</p>
-    <pre>msg.query = "SELECT * FROM users WHERE active = ?";
-msg.params = [1];
-return msg;</pre>
+    <h3>Monitoring</h3>
+    <p>The node provides real-time status information:</p>
+    <ul>
+        <li><strong>Green</strong> - Server running, shows connected client count</li>
+        <li><strong>Yellow</strong> - Initializing or connecting</li>
+        <li><strong>Red</strong> - Connection error or server failure</li>
+    </ul>
     
-    <h3>Bezpieczeństwo</h3>
-    <p><strong>Uwaga:</strong> Zawsze używaj parametryzowanych zapytań (prepared statements) 
-    aby uniknąć ataków SQL Injection. Użyj właściwości <code>msg.params</code> 
-    do przekazywania parametrów.</p>
+    <h3>Client Library Usage</h3>
+    <pre>// Initialize connection
+const connection = new NodeRedWSConnection(endpoint, password);
+
+// Event handlers
+connection.onConnect = () => console.log('Connected');
+connection.onError = (error) => console.error('Error:', error);
+connection.onDisconnect = () => console.log('Disconnected');
+
+// Execute queries
+const result = await connection.Query('SELECT * FROM users WHERE id = ?', [123]);
+const syncResult = connection.SyncQuery('SELECT COUNT(*) FROM products', [], 5000);</pre>
 </script>

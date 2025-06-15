@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node-RED MySQL WebSocket Client Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .status.connected { background-color: #d4edda; color: #155724; }
+        .status.connecting { background-color: #fff3cd; color: #856404; }
+        .status.disconnected { background-color: #f8d7da; color: #721c24; }
+        .status.error { background-color: #f8d7da; color: #721c24; }
+        
+        input, textarea, button {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .query-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .results {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Node-RED MySQL WebSocket Client Demo</h1>
+    
+    <div class="container">
+        <h2>Connection Settings</h2>
+        <div>
+            <label>WebSocket URL:</label>
+            <input type="text" id="wsUrl" value="ws://localhost:8080/mysql-ws" style="width: 300px;">
+        </div>
+        <div>
+            <label>Password (optional):</label>
+            <input type="password" id="wsPassword" placeholder="Leave empty if no auth required">
+        </div>
+        <div>
+            <button id="connectBtn">Connect</button>
+            <button id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+        
+        <div id="connectionStatus" class="status disconnected">
+            Status: Disconnected
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Query Interface</h2>
+        <div class="query-section">
+            <div>
+                <h3>Async Query (Promise-based)</h3>
+                <textarea id="asyncQuery" rows="4" style="width: 100%;" placeholder="SELECT * FROM users LIMIT 10">SELECT * FROM information_schema.TABLES LIMIT 5</textarea>
+                <br>
+                <input type="text" id="asyncParams" placeholder="Parameters (JSON array): [1, 'admin']" style="width: 100%;">
+                <br>
+                <button id="executeAsyncBtn" disabled>Execute Async Query</button>
+            </div>
+            
+            <div>
+                <h3>Sync Query (Blocking)</h3>
+                <textarea id="syncQuery" rows="4" style="width: 100%;" placeholder="SELECT COUNT(*) as total FROM users">SELECT DATABASE() as current_db</textarea>
+                <br>
+                <input type="text" id="syncParams" placeholder="Parameters (JSON array): []" style="width: 100%;">
+                <br>
+                <input type="number" id="syncTimeout" value="5000" placeholder="Timeout (ms)" style="width: 100%;">
+                <br>
+                <button id="executeSyncBtn" disabled>Execute Sync Query</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Query Results</h2>
+        <div id="queryResults" class="results">No queries executed yet...</div>
+    </div>
+    
+    <div class="container">
+        <h2>Connection Log</h2>
+        <div id="connectionLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script src="nodered-ws-client.js"></script>
+    <script>
+        let connection = null;
+        
+        // DOM elements
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const executeAsyncBtn = document.getElementById('executeAsyncBtn');
+        const executeSyncBtn = document.getElementById('executeSyncBtn');
+        const connectionLog = document.getElementById('connectionLog');
+        const queryResults = document.getElementById('queryResults');
+        
+        // Logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#333';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            connectionLog.appendChild(logEntry);
+            connectionLog.scrollTop = connectionLog.scrollHeight;
+        }
+        
+        function clearLog() {
+            connectionLog.innerHTML = '';
+        }
+        
+        // Update UI based on connection status
+        function updateUI() {
+            if (!connection) {
+                connectionStatus.textContent = 'Status: Disconnected';
+                connectionStatus.className = 'status disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                executeAsyncBtn.disabled = true;
+                executeSyncBtn.disabled = true;
+                return;
+            }
+            
+            const status = connection.Status;
+            connectionStatus.textContent = `Status: ${status.connection} | Auth: ${status.authenticated} | Client ID: ${status.clientId || 'None'}`;
+            
+            switch (status.connection) {
+                case 'connected':
+                    connectionStatus.className = status.authenticated ? 'status connected' : 'status connecting';
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    executeAsyncBtn.disabled = !status.authenticated;
+                    executeSyncBtn.disabled = !status.authenticated;
+                    break;
+                case 'connecting':
+                    connectionStatus.className = 'status connecting';
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    executeAsyncBtn.disabled = true;
+                    executeSyncBtn.disabled = true;
+                    break;
+                default:
+                    connectionStatus.className = 'status disconnected';
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    executeAsyncBtn.disabled = true;
+                    executeSyncBtn.disabled = true;
+            }
+        }
+        
+        // Connection event handlers
+        function setupConnectionHandlers() {
+            if (!connection) return;
+            
+            connection.onConnect = () => {
+                log('Connected to WebSocket server!', 'success');
+                updateUI();
+            };
+            
+            connection.onError = (error) => {
+                log(`Error: ${error.message}`, 'error');
+                updateUI();
+            };
+            
+            connection.onDisconnect = (event) => {
+                log(`Disconnected from server. Code: ${event.code}`, 'error');
+                updateUI();
+            };
+            
+            connection.onHeartbeat = () => {
+                log('Heartbeat received from server');
+            };
+            
+            connection.onServerPing = () => {
+                log('Ping response sent to server');
+            };
+        }
+        
+        // Connect button handler
+        connectBtn.addEventListener('click', () => {
+            const url = document.getElementById('wsUrl').value;
+            const password = document.getElementById('wsPassword').value || null;
+            
+            log(`Attempting to connect to ${url}...`);
+            
+            try {
+                connection = new NodeRedWSConnection(url, password);
+                setupConnectionHandlers();
+                updateUI();
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+            }
+        });
+        
+        // Disconnect button handler
+        disconnectBtn.addEventListener('click', () => {
+            if (connection) {
+                connection.disconnect();
+                connection = null;
+                log('Disconnected by user', 'info');
+                updateUI();
+            }
+        });
+        
+        // Parse parameters from input
+        function parseParams(paramStr) {
+            if (!paramStr.trim()) return [];
+            try {
+                return JSON.parse(paramStr);
+            } catch (error) {
+                log(`Invalid parameters format: ${error.message}`, 'error');
+                return [];
+            }
+        }
+        
+        // Display query results
+        function displayResults(results, queryType) {
+            const resultDiv = document.getElementById('queryResults');
+            
+            if (!results) {
+                resultDiv.textContent = `${queryType} Query: No results or query failed`;
+                return;
+            }
+            
+            let output = `=== ${queryType} Query Results ===\n`;
+            output += `Rows: ${results.rowCount || 0}\n`;
+            output += `Affected Rows: ${results.affectedRows || 0}\n`;
+            if (results.insertId) output += `Insert ID: ${results.insertId}\n`;
+            output += '\nData:\n';
+            
+            if (results.data && results.data.length > 0) {
+                // Create table
+                const table = document.createElement('table');
+                
+                // Headers
+                const headerRow = document.createElement('tr');
+                Object.keys(results.data[0]).forEach(key => {
+                    const th = document.createElement('th');
+                    th.textContent = key;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+                
+                // Data rows
+                results.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    Object.values(row).forEach(value => {
+                        const td = document.createElement('td');
+                        td.textContent = value === null ? 'NULL' : String(value);
+                        tr.appendChild(td);
+                    });
+                    table.appendChild(tr);
+                });
+                
+                resultDiv.innerHTML = output;
+                resultDiv.appendChild(table);
+            } else {
+                resultDiv.textContent = output + 'No data returned';
+            }
+        }
+        
+        // Async query handler
+        executeAsyncBtn.addEventListener('click', async () => {
+            const query = document.getElementById('asyncQuery').value;
+            const params = parseParams(document.getElementById('asyncParams').value);
+            
+            if (!query.trim()) {
+                log('Please enter a query', 'error');
+                return;
+            }
+            
+            log(`Executing async query: ${query}`);
+            
+            try {
+                executeAsyncBtn.disabled = true;
+                const results = await connection.Query(query, params);
+                log(`Async query completed successfully. Rows: ${results.rowCount}`, 'success');
+                displayResults(results, 'Async');
+            } catch (error) {
+                log(`Async query failed: ${error.message}`, 'error');
+                displayResults(null, 'Async');
+            } finally {
+                executeAsyncBtn.disabled = false;
+            }
+        });
+        
+        // Sync query handler
+        executeSyncBtn.addEventListener('click', () => {
+            const query = document.getElementById('syncQuery').value;
+            const params = parseParams(document.getElementById('syncParams').value);
+            const timeout = parseInt(document.getElementById('syncTimeout').value) || 5000;
+            
+            if (!query.trim()) {
+                log('Please enter a query', 'error');
+                return;
+            }
+            
+            log(`Executing sync query: ${query} (timeout: ${timeout}ms)`);
+            
+            try {
+                executeSyncBtn.disabled = true;
+                const results = connection.SyncQuery(query, params, timeout);
+                
+                if (results) {
+                    log(`Sync query completed successfully. Rows: ${results.rowCount}`, 'success');
+                    displayResults(results, 'Sync');
+                } else {
+                    log('Sync query failed or timed out', 'error');
+                    displayResults(null, 'Sync');
+                }
+            } catch (error) {
+                log(`Sync query error: ${error.message}`, 'error');
+                displayResults(null, 'Sync');
+            } finally {
+                executeSyncBtn.disabled = false;
+            }
+        });
+        
+        // Initialize UI
+        updateUI();
+        log('WebSocket MySQL Client Demo loaded');
+        
+        // Example queries for demonstration
+        log('Example queries:');
+        log('- SELECT DATABASE() as current_database');
+        log('- SHOW TABLES');
+        log('- SELECT * FROM information_schema.TABLES LIMIT 5');
+        log('- SELECT USER() as current_user, NOW() as current_time');
+    </script>
+</body>
+</html>

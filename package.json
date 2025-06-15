@@ -1,7 +1,7 @@
 {
-  "name": "node-red-contrib-mysql-query",
+  "name": "node-red-contrib-mysql-websocket-server",
   "version": "1.0.0",
-  "description": "Node-RED plugin dla wykonywania zapytań MySQL z obsługą WebSocket",
+  "description": "Professional WebSocket server for real-time MySQL database access with authentication and connection management",
   "main": "mysql-query.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,29 +9,33 @@
   "keywords": [
     "node-red",
     "mysql",
+    "websocket",
     "database",
-    "query",
-    "websocket"
+    "real-time",
+    "authentication",
+    "connection-pooling",
+    "heartbeat"
   ],
   "author": "Your Name",
   "license": "MIT",
   "node-red": {
     "nodes": {
-      "mysql-query": "mysql-query.js"
+      "mysql-websocket-server": "mysql-query.js"
     }
   },
   "dependencies": {
-    "mysql2": "^3.6.0"
+    "mysql2": "^3.6.0",
+    "ws": "^8.18.2"
   },
   "peerDependencies": {
     "node-red": "^3.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "your-repository-url"
+    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin.git"
   },
   "bugs": {
-    "url": "your-repository-url/issues"
+    "url": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin/issues"
   },
-  "homepage": "your-repository-url#readme"
+  "homepage": "https://github.com/ussdeveloper/nodered-ws-mysql-query-plugin#readme"
 }
